@@ -6,190 +6,122 @@
 /*   By: mlagrang <mlagrang@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 10:24:53 by mlagrang          #+#    #+#             */
-/*   Updated: 2021/12/02 13:26:33 by mlagrang         ###   ########.fr       */
+/*   Updated: 2022/01/03 15:52:49 by mlagrang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_fractol.h"
 
-#define depth_max 1000
-#define HEIGHT 640
-#define WIDTH 640
-
-typedef struct s_data
-{
-	void	*img;
-	char	*addr;
-	int		bits_per_pixel;
-	int		line_length;
-	int		endian;
-}		t_data;
-
-typedef struct s_cpl
-{
-	double	im;
-	double	re;
-}		t_cpl;
-
-typedef struct s_vars
-{
-	void	*mlx;
-	void	*win;
-	int		x;
-	int		y;
-	int		zx;
-	int		zy;
-	double	lzx;
-	double	lzy;
-	double	zoom;
-	unsigned int	color;
-	t_data	*im;
-}		t_vars;
-
 int	close(t_vars	*var)
 {
 	mlx_destroy_window(var->mlx, var->win);
+	free(var->affx);
+	free(var->affy);
 	exit(EXIT_SUCCESS);
 }
 
-t_cpl	init_cpl(int x, int y , double zoom)
+int	mouse_hook(int button, int x, int y, t_vars *vars)
 {
-	t_cpl	c;
-
-	c.re = 2.0 * 2.0 / zoom * (x - WIDTH / 2.0) / WIDTH;
-	c.im = 2.0 * 2.0 / zoom * (y - HEIGHT / 2.0) / WIDTH;
-	return (c);
-}
-
-int	mandelbrot_p(int x, int y, t_vars *var)
-{
-	t_cpl	complex;
-	t_cpl	nb;
-	int		depth;
-	double	rec;
-	double	imc;
-
-	complex = init_cpl(x + ((var->zx - WIDTH / 2)),
-			y + ((var->zy - HEIGHT / 2)), var->zoom);
-	depth = 0;
-	nb.re = 0;
-	nb.im = 0;
-	rec = 0;
-	imc = 0;
-	while (rec + imc <= 4 && depth < depth_max)
+	if (button == 4 && (vars->fun != 2 || vars->pause_julia == 1))
 	{
-		nb.im = 2 * nb.re * nb.im + complex.im;
-		nb.re = rec - imc + complex.re;
-		rec = nb.re * nb.re;
-		imc = nb.im * nb.im;
-		depth++;
+		vars->x1 = (x / vars->zoom + vars->x1) - (x / (vars->zoom * 1.3));
+		vars->y1 = (y / vars->zoom + vars->y1) - (y / (vars->zoom * 1.3));
+		vars->zoom = vars->zoom * 1.3;
+		vars->depth_max += 5;
 	}
-	return (depth);
-}
-
-void	my_mlx_pixel_put(t_data *data, int x, int y, int color)
-{
-	char	*dst;
-
-	dst = data->addr + (y * data->line_length + x * (data->bits_per_pixel / 8));
-	*(unsigned int*)dst = color;
-}
-
-void	mandelbrot_d(t_vars *v)
-{
-	int	x;
-	int	y;
-	int	pixel;
-
-	y = 0;
-	while (y < HEIGHT)
+	if (button == 5 && (vars->fun != 2 || vars->pause_julia == 1)
+		&& vars->depth_max > 10)
 	{
-		x = 0;
-		while (x < WIDTH)
+		vars->x1 = (x / vars->zoom + vars->x1) - (x / (vars->zoom / 1.3));
+		vars->y1 = (y / vars->zoom + vars->y1) - (y / (vars->zoom / 1.3));
+		vars->zoom = vars->zoom / 1.3;
+		vars->depth_max -= 5;
+	}
+	ft_draw(vars, vars->fract_ft);
+	if (vars->fun == 2)
+	{
+		mlx_string_put(vars->mlx, vars->win, 0, 10, 0x000000, vars->affx);
+		mlx_string_put(vars->mlx, vars->win, 0, 20, 0x000000, vars->affy);
+	}
+	return (0);
+}
+
+int	mouse_julia(int x, int y, t_vars *d)
+{
+	if (d->fun == 2 && d->pause_julia == 0)
+	{
+		d->re = 4 * ((double)x / WIDTH - 0.5);
+		d->im = 4 * ((double)(WIDTH - y) / WIDTH - 0.5);
+		ft_draw(d, &julia);
+		d->affx = ft_itoa(x, d->affx);
+		if (!d->affx)
+			exit(EXIT_FAILURE);
+		d->affy = ft_itoa(y, d->affy);
+		if (!d->affy)
 		{
-			my_mlx_pixel_put(v->im, x, y, v->color * mandelbrot_p(x, y, v));
-			x++;
+			free(d->affx);
+			exit(EXIT_FAILURE);
 		}
-		y++;
+		mlx_string_put(d->mlx, d->win, 0, 10, 0x000000, d->affx);
+		mlx_string_put(d->mlx, d->win, 0, 20, 0x000000, d->affy);
 	}
-	mlx_put_image_to_window(v->mlx, v->win, v->im->img, 0, 0);
+	return (0);
 }
 
 int	key_hook(int keycode, t_vars *vars)
 {
 	printf("keycode = %d\n", keycode);
-	if (keycode == 65307)
+	if (keycode == 53)
+		close(vars);
+	if (keycode == 15)
+		init_all(vars);
+	if (keycode >= 18 && keycode <= 21)
+		vars->pal = &get_pal()[keycode - 18];
+	if (keycode == 11)
+		vars->fun = 3;
+	if (keycode == 38)
+		vars->fun = 2;
+	if (keycode == 46)
+		vars->fun = 1;
+	if ((keycode == 49 && vars->fun == 2) || (keycode >= 123 && keycode <= 126)
+		|| keycode == 36 || keycode == 51)
+		ft_move(keycode, vars);
+	if (keycode == 11 || keycode == 38 || keycode == 46)
+		ft_choix(vars);
+	ft_draw(vars, vars->fract_ft);
+	if (vars->fun == 2)
 	{
-		mlx_destroy_window(vars->mlx, vars->win);
-		exit(EXIT_SUCCESS);
+		mlx_string_put(vars->mlx, vars->win, 0, 10, 0x000000, vars->affx);
+		mlx_string_put(vars->mlx, vars->win, 0, 20, 0x000000, vars->affy);
 	}
-	if (keycode == 'c')
-		vars->color *= 0x0A0A0A;
-	if (keycode == 'r')
-	{
-		vars->zoom = 1;
-		vars->zx = WIDTH / 2;
-		vars->zy = HEIGHT / 2;
-		vars->lzx = 0;
-		vars->lzy = 0;
-	}
-	mlx_clear_window(vars->mlx,vars->win);
-	mandelbrot_d(vars);
-}
-
-int	mouse_hook(int button, int x, int y, t_vars *vars)
-{
-	printf("button = %d\n", button);
-	if (button == 1)
-		printf("%d	%d\n", vars->x, vars->y);
-	if (button == 4)
-	{
-		if (vars->zx != WIDTH/2 || vars->zy != HEIGHT/2)
-		{
-			vars->lzx = vars->zx + vars->lzx / vars->zoom;
-			vars->lzy = vars->zy + vars->lzx / vars->zoom;
-		}
-		dprintf(1, "%d	%d	%d	%d	%f", vars->zx, WIDTH/2, vars->zy, HEIGHT/2, vars->zoom);
-		vars->zx = (vars->lzx + x) / vars->zoom;
-		vars->zy = (vars->lzy + y) / vars->zoom;
-		vars->zoom = vars->zoom * 1.3;
-	}
-	mlx_clear_window(vars->mlx,vars->win);
-	mandelbrot_d(vars);
-}
-
-int	mouse_pos(int x, int y, t_vars *vars)
-{
-	//vars->x = x;
-	//vars->y = y;
+	return (0);
 }
 
 int	main(int ac, char **av)
 {
 	t_vars	vars;
 	t_data	img;
-	float	i;
 
-	(void)(ac);
-	(void)(av);
-	vars.x = 0;
-	vars.y = 0;
-	vars.zoom = 1;
-	vars.zx = WIDTH / 2;
-	vars.zy = HEIGHT / 2;
-	vars.lzx = 0;
-	vars.lzy = 0;
-	vars.im = &img;
-	vars.color = 0x0000FF;
+	if (ac != 2)
+	{
+		printf("Veuillez rentrer un parametre:\
+\n-mandelbrot\n-julia\n-burning_ship");
+		return (0);
+	}
+	if (!check_av(av, &vars))
+		return (0);
+	vars.ima = &img;
+	init_all(&vars);
 	vars.mlx = mlx_init();
 	vars.win = mlx_new_window(vars.mlx, WIDTH, HEIGHT, "UwU");
-	vars.im->img = mlx_new_image(vars.mlx, WIDTH, HEIGHT);
-	vars.im->addr = mlx_get_data_addr(vars.im->img, &vars.im->bits_per_pixel,
-			&vars.im->line_length, &vars.im->endian);
-	mandelbrot_d(&vars);
+	vars.ima->img = mlx_new_image(vars.mlx, WIDTH, HEIGHT);
+	vars.ima->addr = mlx_get_data_addr(vars.ima->img, &vars.ima->bits_per_pixel,
+			&vars.ima->line_length, &vars.ima->endian);
+	ft_choix(&vars);
 	mlx_mouse_hook(vars.win, mouse_hook, &vars);
 	mlx_key_hook(vars.win, key_hook, &vars);
-	mlx_hook(vars.win, 6, 1L << 6, mouse_pos, &vars);
+	mlx_hook(vars.win, 6, 1L << 6, mouse_julia, &vars);
 	mlx_hook(vars.win, 17, 1L << 2, close, &vars);
 	mlx_loop(vars.mlx);
+	return (0);
 }
