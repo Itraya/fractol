@@ -6,7 +6,7 @@
 #    By: mlagrang <mlagrang@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/02 10:23:26 by mlagrang          #+#    #+#              #
-#    Updated: 2022/01/03 14:24:37 by mlagrang         ###   ########.fr        #
+#    Updated: 2022/01/31 11:33:29 by mlagrang         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,15 +20,20 @@ NAME	= fractol
 
 CC		= gcc
 
-FLAGS	= -Wall -Wextra -Werror
+FLAGS	= -Wall -Wextra -Werror -Ofast
 
-CFLAGS	= -Ofast -framework OpenGL -framework AppKit -g -lmlx -Lmlx
+CFLAGS	= -framework OpenGL -framework AppKit -g -lmlx -Lmlx
 
-all:
-		gcc ${CFLAGS} ${FLAGS} ${SRCS} -o ${NAME}
+%.o:	%.c ${HEADERS} Makefile
+		${CC} ${FLAGS} -c $< -o $@
 
-ex:		re
-		./${NAME}
+all:	mlx ${NAME}
+
+${NAME}:	${OBJS}
+			${CC} ${CFLAGS} ${FLAGS} ${OBJS} -o ${NAME}
+
+mlx:
+		@make -C ./mlx/
 
 m:		re
 		./${NAME} mandelbrot
@@ -39,15 +44,13 @@ j:		re
 b:		re
 		./${NAME} burning_ship
 
-l:
-		gcc -fsanitize=address ${CFLAGS} ${SRCS} -o ${NAME}
-
 clean:
 		rm -f ${OBJS}
 
 fclean:	clean
 		rm -f ${NAME}
+		@make -C ./mlx/ clean
 
 re:		fclean all
 
-.PHONY:	all clean fclean re bonus l m j b ex
+.PHONY:	all clean fclean re bonus m j b ex mlx

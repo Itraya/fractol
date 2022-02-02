@@ -6,7 +6,7 @@
 /*   By: mlagrang <mlagrang@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 10:27:50 by mlagrang          #+#    #+#             */
-/*   Updated: 2022/01/03 15:52:24 by mlagrang         ###   ########.fr       */
+/*   Updated: 2022/02/02 10:47:46 by mlagrang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 # include "mlx/mlx.h"
 # include <stdlib.h>
 # include <math.h>
-# include <stdio.h>
+# include <unistd.h>
 # define HEIGHT 900
 # define WIDTH 900
 
@@ -77,6 +77,7 @@ typedef struct s_vars
 	double			zoom;
 	unsigned int	color;
 	int				fun;
+	int				finit;
 	int				pause_julia;
 	void			*fract_ft;
 	char			*affx;
@@ -102,5 +103,6 @@ char	*ft_itoa(int n, char *a);
 int		ft_exit(t_vars *vars);
 void	ft_draw(t_vars *v, int (*f)(int, int, t_vars *));
 t_pal	*get_pal(void);
+void	get_pal_keycode(int keycode, t_vars *vars);
 
 #endif
