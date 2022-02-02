@@ -6,7 +6,7 @@
 /*   By: mlagrang <mlagrang@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 12:33:47 by mlagrang          #+#    #+#             */
-/*   Updated: 2022/01/03 14:17:41 by mlagrang         ###   ########.fr       */
+/*   Updated: 2022/01/04 10:38:04 by mlagrang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,4 +53,18 @@ void	ft_move(int keycode, t_vars *vars)
 		vars->x1 = vars->x1 - 50 / vars->zoom;
 	else if (keycode == 36 || keycode == 51)
 		ft_zoom(keycode, vars);
+}
+
+void	get_pal_keycode(int keycode, t_vars *vars)
+{
+	if (keycode >= 18 && keycode <= 21)
+		vars->pal = &get_pal()[keycode - 18];
+	if (keycode == 23)
+		vars->pal = &get_pal()[4];
+	if (keycode == 22)
+		vars->pal = &get_pal()[5];
+	if (keycode == 26)
+		vars->pal = &get_pal()[6];
+	if (keycode == 28)
+		vars->pal = &get_pal()[7];
 }

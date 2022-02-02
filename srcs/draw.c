@@ -6,7 +6,7 @@
 /*   By: mlagrang <mlagrang@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 11:02:03 by mlagrang          #+#    #+#             */
-/*   Updated: 2022/01/03 15:19:51 by mlagrang         ###   ########.fr       */
+/*   Updated: 2022/01/31 11:37:52 by mlagrang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,13 @@ void	ft_choix(t_vars *v)
 	else if (v->fun == 3)
 		burning_ship_init(v);
 	ft_draw(v, v->fract_ft);
+	if (v->fun == 2)
+	{
+		v->affx = ft_itoa(WIDTH * 0.3, v->affx);
+		v->affy = ft_itoa(WIDTH * 0.461, v->affy);
+		mlx_string_put(v->mlx, v->win, 0, 10, 0x000000, v->affx);
+		mlx_string_put(v->mlx, v->win, 0, 20, 0x000000, v->affy);
+	}
 }
 
 int	ft_strcmp(char *a, char *b)
@@ -62,6 +69,8 @@ int	ft_strcmp(char *a, char *b)
 
 int	check_av(char **a, t_vars *v)
 {
+	if (!a[1])
+		return (0);
 	if (!ft_strcmp(a[1], "mandelbrot"))
 	{
 		v->fun = 1;

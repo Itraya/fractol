@@ -6,32 +6,36 @@
 /*   By: mlagrang <mlagrang@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/03 11:03:50 by mlagrang          #+#    #+#             */
-/*   Updated: 2022/01/03 16:12:43 by mlagrang         ###   ########.fr       */
+/*   Updated: 2022/01/27 10:44:38 by mlagrang         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../ft_fractol.h"
 
+void	get_pal1(t_pal *tab)
+{
+	tab[4] = \
+		(t_pal){15, {0x2a4858, 0x255566, 0x1c6373, \
+						0x0b717e, 0x007f86, 0x008d8c, \
+						0x009c8f, 0x23aa8f, 0x3fb78d, \
+						0x5bc489, 0x77d183, 0x95dd7d, \
+						0xb5e877, 0xd7f171, 0xfafa6e}};
+	tab[5] = \
+		(t_pal){5, {0x000764, 0x206BCB, 0xFFFFFF, \
+						0xFFAA00, 0x000200}};
+	tab[6] = \
+		(t_pal){5, {0xF8F8FF, 0xCAC9CD, 0x9B9A9C, \
+						0x6D6A6A, 0x3E3B39}};
+	tab[7] = \
+		(t_pal){7, {0xFF0000, 0xFFFF00, 0x00FF00, \
+						0x00FFFF, 0x0000FF, 0xFF00FF, \
+						0xFF0000}};
+}
+
 t_pal	*get_pal(void)
 {
-	static t_pal	tab[4];
+	static t_pal	tab[8];
 
-	// tab[0] = \
-	// 	(t_pal){15, {0x2a4858, 0x255566, 0x1c6373, \
-	// 					0x0b717e, 0x007f86, 0x008d8c, \
-	// 					0x009c8f, 0x23aa8f, 0x3fb78d, \
-	// 					0x5bc489, 0x77d183, 0x95dd7d, \
-	// 					0xb5e877, 0xd7f171, 0xfafa6e}};
-	// tab[1] = \
-	// 	(t_pal){5, {0x000764, 0x206BCB, 0xFFFFFF, \
-	// 					0xFFAA00, 0x000200}};
-	// tab[2] = \
-	// 	(t_pal){5, {0xF8F8FF, 0xCAC9CD, 0x9B9A9C, \
-	// 					0x6D6A6A, 0x3E3B39}};
-	// tab[3] = \
-	// 	(t_pal){7, {0xFF0000, 0xFFFF00, 0x00FF00, \
-	// 					0x00FFFF, 0x0000FF, 0xFF00FF, \
-	// 					0xFF0000}};
 	tab[0] = \
 		(t_pal){15, {0xd5b7a7, 0xdaaa99, 0xe39c8c, \
 						0xf48e81, 0xff8079, 0xff7273, \
@@ -48,11 +52,20 @@ t_pal	*get_pal(void)
 		(t_pal){7, {0x00FFFF, 0x0000FF, 0xFF00FF, \
 						0xFF0000, 0xFFFF00, 0x00FF00, \
 						0x00FFFF}};
+	get_pal1(tab);
 	return (tab);
 }
 
 int	init_all(t_vars *vars)
 {
+	if (vars->finit == 0)
+	{
+		vars->finit = 1;
+		vars->affx = NULL;
+		vars->affy = NULL;
+		vars->affx = ft_itoa(WIDTH * 0.3, vars->affx);
+		vars->affy = ft_itoa(WIDTH * 0.461, vars->affy);
+	}
 	vars->x1 = -2;
 	vars->y1 = -2;
 	vars->zoom = WIDTH / 4;
@@ -62,10 +75,5 @@ int	init_all(t_vars *vars)
 	vars->lzy = 0;
 	vars->color = 0x0FF088;
 	vars->depth_max = 50;
-	vars->pal = get_pal();
-	vars->affx = NULL;
-	vars->affy = NULL;
-	vars->affx = ft_itoa(WIDTH * 0.3, vars->affx);
-	vars->affy = ft_itoa(WIDTH * 0.461, vars->affy);
 	return (0);
 }
