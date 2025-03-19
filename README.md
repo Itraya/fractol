@@ -25,7 +25,7 @@ Fractol est un programme de visualisation de fractales développé en C utilisan
 ### Compilation
 
 ```bash
-git clone https://github.com/ton-utilisateur/fractol.git
+git clone https://github.com/Itraya/fractol.git
 cd fractol
 make
 ```
