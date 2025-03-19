@@ -57,10 +57,8 @@ t_color	smooth(t_vars *d, int iter)
 
 void	ft_color(t_vars *v, int x, int y, int iter)
 {
-	double	k;
 	int		color;
 
-	k = iter;
 	if (iter != v->depth_max)
 		color = smooth(v, iter).value;
 	else
